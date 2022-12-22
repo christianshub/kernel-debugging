@@ -1,0 +1,6 @@
+.vagrant/
+*.box
+*.pdb
+*.cer
+System*Volume*Information/
+symbols/
