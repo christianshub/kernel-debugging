@@ -95,6 +95,7 @@ Follow the steps in the sections below to get started.
     `Win10` is the name of the newly created VM (it may have a different name in
     your situation). `win10.box` is the vagrant VM box name.
 
+1) Edit `guest/kdbg.bat` so that `hostip` reflects your private IP.
 1) Now double-click on `start-debugger.bat`
 
    > To shutdown the vagrant box close WinDbg.
@@ -106,7 +107,7 @@ Note: To remove boxes do:
   vagrant box remove <name.box>
   ```
 
-The box can now be recreated (step 2).
+The box can now be recreated.
 
 ### Refresh driver
 

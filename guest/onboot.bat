@@ -1,8 +1,10 @@
 @echo off
 
-echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
-set params = %*:"=""
-echo UAC.ShellExecute "cmd.exe", "/c ""%~dp0\my_commands.bat"" %params%", "", "runas", 1 >> "%temp%\getadmin.vbs"
+echo Creating a scheduled task to run my_commands.bat with elevated privileges
+schtasks /create /tn RunMyCommands /tr "cmd.exe /c C:\kernel-debugging\guest\my_commands.bat" /sc once /st 00:00 /rl highest /f
 
-"%temp%\getadmin.vbs"
-del "%temp%\getadmin.vbs"
+echo Running the scheduled task
+schtasks /run /tn RunMyCommands
+
+echo Deleting the scheduled task
+schtasks /delete /tn RunMyCommands /f
