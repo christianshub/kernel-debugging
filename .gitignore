@@ -4,3 +4,5 @@
 *.cer
 System*Volume*Information/
 symbols/
+.vs/
+x64/
