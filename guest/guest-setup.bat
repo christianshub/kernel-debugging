@@ -38,6 +38,23 @@ echo Disable security
 reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v DisableAntiSpyware /t REG_DWORD /d 1 /f
 reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v DisableAntiTamper /t REG_DWORD /d 1 /f
 
+echo Enable test signing mode
+bcdedit /set testsigning on
+
+echo Enable kernel debugging
+bcdedit /debug on
+
 echo All needed registries are changed.
 echo Remember to run Virtual Boxs Guest Tools!
+
+echo.
+echo A restart is required for the changes to take effect.
+choice /M "Do you want to restart now?"
+
+if %ERRORLEVEL% == 1 (
+  shutdown /r /t 0
+) else (
+  echo Restart aborted. Please restart your computer manually to apply the changes.
+)
+
 pause

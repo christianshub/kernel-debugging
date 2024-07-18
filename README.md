@@ -12,24 +12,20 @@ Tested to work with
 
 Follow the steps in the sections below to get started.
 
-> NOTE: If `windriver.sys` is replaced with another driver, then ensure the name
-> is corrosponding in `my_commands.bat`. `windriver.sys` is a simple "Hello
-> World" driver, but it's always better to compile .sys files yourself to avoid
-> compromisation.
-
 ## Visual Studio setup
 * Download the *newest* version of Visual Studio and ensure the *latest* are
   installed:
 
   Workloads:
   * Desktop development with C++
-  * Universal Windows Platform development
+  * Windows application desktop
 
   Individual components:
   * MSVC vXX - VS 20XX C++ x64/x86 build tools (Latest)
   * MSVC vXX - VS 20XX C++ x64/x86 Spectre-mitigated libs (Latest)
-  * Install the newest SDK
+  * Install the newest Windows SDK
   * Install the newest WDK (VS *must* be installed first)
+    * Install from <https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk>
 
   > NOTE: The libraries can be installed from the VS installer or, by visiting
   > [learn.microsoft.com](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk).

@@ -1,8 +1,8 @@
-sc stop yourdriver
-sc delete yourdriver
-sc create yourdriver binPath= C:\kernel-debugging\yourdriver.sys type= kernel
-copy C:\kernel-debugging\yourdriver.sys C:\Windows\System32\drivers\
-sc start yourdriver
-sc qc yourdriver
+sc stop input
+sc delete input
+sc create input binPath= C:\kernel-debugging\input.sys type= kernel
+copy C:\kernel-debugging\input.sys C:\Windows\System32\drivers\
+sc start input
+sc qc input
 
 timeout /t 10
