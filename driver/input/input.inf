@@ -1,14 +1,10 @@
-;
-; input.inf
-;
-
 [Version]
 Signature   = "$WINDOWS NT$"
-Class       = System ; TODO: specify appropriate Class
-ClassGuid   = {4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Class       = System
+ClassGuid   = {4d36e97d-e325-11ce-bfc1-08002be10318}
 Provider    = %ManufacturerName%
 CatalogFile = input.cat
-DriverVer   = ; TODO: set DriverVer in stampinf property pages
+DriverVer   = "07/18/2023"
 PnpLockdown = 1
 
 [DestinationDirs]
@@ -25,10 +21,10 @@ input.sys = 1,,
 ;*****************************************
 
 [Manufacturer]
-%ManufacturerName% = Standard,NT$ARCH$.10.0...16299 ; %13% support introduced in build 16299
+%ManufacturerName% = Standard,NT$ARCH$.10.0...16299
 
 [Standard.NT$ARCH$.10.0...16299]
-%input.DeviceDesc% = input_Device, Root\input ; TODO: edit hw-id
+%input.DeviceDesc% = input_Device, Root\input
 
 [input_Device.NT]
 CopyFiles = File_Copy
@@ -52,11 +48,11 @@ ServiceBinary  = %13%\input.sys
 KmdfService = input, input_wdfsect
 
 [input_wdfsect]
-KmdfLibraryVersion = $KMDFVERSION$
+KmdfLibraryVersion = 1.11
 
 [Strings]
 SPSVCINST_ASSOCSERVICE = 0x00000002
-ManufacturerName = "<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ManufacturerName = "Your Manufacturer Name"
 DiskName = "input Installation Disk"
 input.DeviceDesc = "input Device"
 input.SVCDESC = "input Service"

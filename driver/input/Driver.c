@@ -1,61 +1,34 @@
 #include <ntddk.h>
 #include <wdf.h>
+
 DRIVER_INITIALIZE DriverEntry;
-EVT_WDF_DRIVER_DEVICE_ADD KmdfHelloWorldEvtDeviceAdd;
+EVT_WDF_DRIVER_DEVICE_ADD EvtDriverDeviceAdd;
+EVT_WDF_DRIVER_UNLOAD UnloadDriver;
 
-NTSTATUS
-DriverEntry(
-    _In_ PDRIVER_OBJECT     DriverObject,
-    _In_ PUNICODE_STRING    RegistryPath
-)
+_Use_decl_annotations_
+void UnloadDriver(IN WDFDRIVER driver)
 {
-    // NTSTATUS variable to record success or failure
-    NTSTATUS status = STATUS_SUCCESS;
+    UNREFERENCED_PARAMETER(driver);
+    DbgPrint("Driver unloaded");
+}
 
-    // Allocate the driver configuration object
+NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING RegistryPath)
+{
     WDF_DRIVER_CONFIG config;
+    WDF_DRIVER_CONFIG_INIT(&config, EvtDriverDeviceAdd);
+    config.EvtDriverUnload = UnloadDriver;
+    NTSTATUS status = WdfDriverCreate(DriverObject, RegistryPath, WDF_NO_OBJECT_ATTRIBUTES, &config, WDF_NO_HANDLE);
 
-    // Print "Hello World" for DriverEntry
-    KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "KmdfHelloWorld: DriverEntry\n"));
+    DbgPrint("Driver loaded");
 
-    // Initialize the driver configuration object to register the
-    // entry point for the EvtDeviceAdd callback, KmdfHelloWorldEvtDeviceAdd
-    WDF_DRIVER_CONFIG_INIT(&config,
-        KmdfHelloWorldEvtDeviceAdd
-    );
-
-    // Finally, create the driver object
-    status = WdfDriverCreate(DriverObject,
-        RegistryPath,
-        WDF_NO_OBJECT_ATTRIBUTES,
-        &config,
-        WDF_NO_HANDLE
-    );
     return status;
 }
 
-NTSTATUS
-KmdfHelloWorldEvtDeviceAdd(
-    _In_    WDFDRIVER       Driver,
-    _Inout_ PWDFDEVICE_INIT DeviceInit
-)
+NTSTATUS EvtDriverDeviceAdd(_In_ WDFDRIVER Driver, _Inout_ PWDFDEVICE_INIT DeviceInit)
 {
-    // We're not using the driver object,
-    // so we need to mark it as unreferenced
     UNREFERENCED_PARAMETER(Driver);
+    WDFDEVICE device;
+    NTSTATUS status = WdfDeviceCreate(&DeviceInit, WDF_NO_OBJECT_ATTRIBUTES, &device);
 
-    NTSTATUS status;
-
-    // Allocate the device object
-    WDFDEVICE hDevice;
-
-    // Print "Hello World"
-    KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "KmdfHelloWorld: KmdfHelloWorldEvtDeviceAdd\n"));
-
-    // Create the device object
-    status = WdfDeviceCreate(&DeviceInit,
-        WDF_NO_OBJECT_ATTRIBUTES,
-        &hDevice
-    );
     return status;
 }

@@ -12,6 +12,10 @@ Tested to work with
 
 Follow the steps in the sections below to get started.
 
+## TODO
+
+* Use VMWare, just more stable.
+
 ## Visual Studio setup
 * Download the *newest* version of Visual Studio and ensure the *latest* are
   installed:
@@ -33,6 +37,10 @@ Follow the steps in the sections below to get started.
   > NOTE2: Ensure that your project from where you compile the driver is
   > outputting its .sys file into `C:\kernel-debugging` (in VS, go to Debug ->
   > Debug Properties -> Output Directory)
+
+## WinDbg setup
+
+Install the newest WinDbg client from <https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/#install-windbg-directly>
 
 ## Download/clone this repository
 
@@ -84,7 +92,9 @@ Follow the steps in the sections below to get started.
 
 1) (One-time) Ensure the base-VM is powered off.
 
-1) (One-time) Open up Powershell on the host PC:
+1) (One-time) Close base VM gracefully.
+
+1) (One-time) Convert Win10 image to vagrant box
 
     ```vagrant
     cd C:\kernel-debugging
@@ -92,22 +102,18 @@ Follow the steps in the sections below to get started.
     vagrant box add win10 win10.box
     ```
 
-    `Win10` is the name of the newly created VM (it may have a different name in
-    your situation). `win10.box` is the vagrant VM box name.
+    > `Win10` is the name of the newly created VM (it may have a different name
+    in your situation). `win10.box` is the vagrant VM box name.
 
-1) Edit `guest/kdbg.bat` so that `hostip` reflects your private IP.
+    > You need to the .box creation if you make changes to the base VM. To remove boxes do:
+
+      ```vagrant
+      vagrant box list
+      vagrant box remove <name.box>
+      ```
+
+1) Edit `kdbg.bat` on your host  machine so that `hostip` reflects your private IP.
 1) Now double-click on `start-debugger.bat`
-
-   > To shutdown the vagrant box close WinDbg.
-
-Note: To remove boxes do:
-
-  ```vagrant
-  vagrant box list
-  vagrant box remove <name.box>
-  ```
-
-The box can now be recreated.
 
 ### Refresh driver
 
