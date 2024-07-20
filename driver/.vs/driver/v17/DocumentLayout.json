@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\kernel-debugging\\driver\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{5D4BA70A-CC77-4FD2-A65A-36BB2C1FF7B4}|testdriver\\testdriver.vcxproj|C:\\kernel-debugging\\driver\\testdriver\\driver.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{5D4BA70A-CC77-4FD2-A65A-36BB2C1FF7B4}|testdriver\\testdriver.vcxproj|solutionrelative:testdriver\\driver.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\kernel-debugging\\driver\\testdriver\\x64\\Debug\\inf2catOutput.log||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:testdriver\\x64\\Debug\\inf2catOutput.log||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{7B97953B-9293-4F0A-B5D4-0DE4604CBB44}|input\\input.vcxproj|C:\\kernel-debugging\\driver\\input\\Driver.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{7B97953B-9293-4F0A-B5D4-0DE4604CBB44}|input\\input.vcxproj|solutionrelative:input\\Driver.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
@@ -22,11 +30,37 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "inf2catOutput.log",
+              "DocumentMoniker": "C:\\kernel-debugging\\driver\\testdriver\\x64\\Debug\\inf2catOutput.log",
+              "RelativeDocumentMoniker": "testdriver\\x64\\Debug\\inf2catOutput.log",
+              "ToolTip": "C:\\kernel-debugging\\driver\\testdriver\\x64\\Debug\\inf2catOutput.log",
+              "RelativeToolTip": "testdriver\\x64\\Debug\\inf2catOutput.log",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001755|",
+              "WhenOpened": "2024-07-20T18:07:39.964Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "driver.c",
+              "DocumentMoniker": "C:\\kernel-debugging\\driver\\testdriver\\driver.c",
+              "RelativeDocumentMoniker": "testdriver\\driver.c",
+              "ToolTip": "C:\\kernel-debugging\\driver\\testdriver\\driver.c",
+              "RelativeToolTip": "testdriver\\driver.c",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABEAAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2024-07-20T18:02:39.385Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "input.inf",
               "DocumentMoniker": "C:\\kernel-debugging\\driver\\input\\input.inf",
               "RelativeDocumentMoniker": "input\\input.inf",
@@ -38,7 +72,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "inf2catOutput.log",
               "DocumentMoniker": "C:\\kernel-debugging\\driver\\input\\x64\\Debug\\inf2catOutput.log",
               "RelativeDocumentMoniker": "input\\x64\\Debug\\inf2catOutput.log",
@@ -50,13 +84,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "Driver.c",
               "DocumentMoniker": "C:\\kernel-debugging\\driver\\input\\Driver.c",
               "RelativeDocumentMoniker": "input\\Driver.c",
               "ToolTip": "C:\\kernel-debugging\\driver\\input\\Driver.c",
               "RelativeToolTip": "input\\Driver.c",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABUAAAAbAAAA",
+              "ViewState": "AQIAAEwAAAAAAAAAAAAAAG8AAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2024-07-18T20:55:24.668Z",
               "EditorCaption": ""

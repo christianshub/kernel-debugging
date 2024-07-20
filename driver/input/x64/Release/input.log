@@ -1,6 +1,6 @@
 ﻿  Building 'input' with toolset 'WindowsKernelModeDriver10.0' and the 'Universal' target platform.
   Stamping x64\Release\input.inf
-  Stamping [Version] section with DriverVer=07/18/2024,23.55.11.558
+  Stamping [Version] section with DriverVer=07/20/2024,8.5.42.407
   Driver.c
   input.vcxproj -> C:\kernel-debugging\driver\x64\Release\input.sys
   Done Adding Additional Store

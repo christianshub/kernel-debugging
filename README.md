@@ -1,152 +1,146 @@
-# Driver development setup
+# Loading a Driver via Command Prompt + WinDBG
 
-This project helps set up driver development through the use of Vagrant to speed
-up the kernel driver debugging process.
+> Typically when you test and debug a driver, the debugger and the driver run on
+> separate computers. The computer that runs the debugger is called the host
+> computer, and the computer that runs the driver is called the target computer.
+> The target computer is also called the test computer.
 
-![](images/vagrant-driver-debug.gif)
+1. Install a Windows VM onto the test computer
+1. Use **VMware** to access the VM (had issues with VirtualBox)
+1. Copy this repo into your test PC at `C:\kernel-debugging\`
+1. Take a snapshot of the clean VM.
+1. On the test PC, enable testsigning, debugging, etc. Add to a .bat script and
+   run:
 
-Tested to work with
+    ```batch
+    @echo off
 
-* Windows 10 version 22H2
-* Windows 10 version 2004
+    echo Check if the WinRM service is running, otherwise set it up, needed for vagrant
+    sc query WinRM | find "STATE" | find "RUNNING" >nul
+    if %ERRORLEVEL% == 0 (
+    echo WinRM service is already running
+    ) else (
+    echo Starting WinRM service
+    winrm quickconfig -q
+    winrm set winrm/config/winrs @{MaxMemoryPerShellMB="512"}
+    winrm set winrm/config @{MaxTimeoutms="1800000"}
+    winrm set winrm/config/service @{AllowUnencrypted="true"}
+    winrm set winrm/config/service/auth @{Basic="true"}
+    sc config WinRM start=auto
+    )
 
-Follow the steps in the sections below to get started.
+    echo Disable automatic updates
+    reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate /t REG_DWORD /d 1 /f
 
-## TODO
+    echo Disable security
+    reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v DisableAntiSpyware /t REG_DWORD /d 1 /f
+    reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v DisableAntiTamper /t REG_DWORD /d 1 /f
 
-* Use VMWare, just more stable.
+    bcdedit /set nointegritychecks on
+    bcdedit /set testsigning on
+    bcdedit /debug on
+    bcdedit /dbgsettings net hostip:192.168.0.151 port:49152 key:1.1.1.1
 
-## Visual Studio setup
-* Download the *newest* version of Visual Studio and ensure the *latest* are
-  installed:
+    echo All needed registries are changed.
+    echo Remember to run Virtual Boxs Guest Tools!
 
-  Workloads:
-  * Desktop development with C++
-  * Windows application desktop
+    echo Disable firewall
+    reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters" /v Start /t REG_DWORD /d 4 /f
 
-  Individual components:
-  * MSVC vXX - VS 20XX C++ x64/x86 build tools (Latest)
-  * MSVC vXX - VS 20XX C++ x64/x86 Spectre-mitigated libs (Latest)
-  * Install the newest Windows SDK
-  * Install the newest WDK (VS *must* be installed first)
-    * Install from <https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk>
+    echo Add kernel debug print
+    reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Debug Print Filter" /v DEFAULT /t REG_DWORD /d 0xf /f
 
-  > NOTE: The libraries can be installed from the VS installer or, by visiting
-  > [learn.microsoft.com](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk).
+    echo Disable UAC
+    reg add "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /d 0 /t REG_DWORD /f /reg:64
 
-  > NOTE2: Ensure that your project from where you compile the driver is
-  > outputting its .sys file into `C:\kernel-debugging` (in VS, go to Debug ->
-  > Debug Properties -> Output Directory)
-
-## WinDbg setup
-
-Install the newest WinDbg client from <https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/#install-windbg-directly>
-
-## Download/clone this repository
-
-1) Download or git clone this repo: `git clone
-   git@github.com:christianshub/kernel-debugging.git` and place it at
-   `C:\kernel-debugging`. This step is important, as certain batch files expects
-   this exact path.
-
-## VM Base Box Creation
-
-1) Download a Windows .iso image at
-   [microsoft.com](https://www.microsoft.com/da-dk/software-download/windows10)
-
-    > Older, specific, versions can be downloaded through the use of
-    > [rufus](https://rufus.ie/en/)
-
-2) Download and install [VirtualBox](https://www.virtualbox.org/) and create a
-   VM named `win10-base` - apply the downloaded .iso file. Specifications:
-
-    * 50 GB HDD
-    * Username: vagrant
-    * Password: vagrant
-
-3) Power up the VM and follow the [vagrant
-   docs](https://developer.hashicorp.com/vagrant/docs/boxes/base#Windows%20Boxes),
-   also listed in detail below:
-
-  * Install the guest tools:
-    * Go to Devices in the top pane -> Insert Guest Addition Image and run
-      installer
-    * Go to Devices in the top pane -> Upgrade Guest additions
-
-  * Copy `guest-setup.bat` into the VM and run it (elevated) to
-    * Enable Kernel Debug Print
-    * Allow Remote Management using WinRM
-    * Set network to Private
-    * Disable User Account Control
-    * Disable firewall
-    * Disable windows auto login
-    * Disable automatic updates (optional)
-    * Disable security (optional)
-
-## Running the environment
-
-### Create and start the vagrant box from scratch
-
-1) (One-time) Ensure vagrant is [downloaded and
-   installed](https://developer.hashicorp.com/vagrant/downloads)
-
-1) (One-time) Ensure the base-VM is powered off.
-
-1) (One-time) Close base VM gracefully.
-
-1) (One-time) Convert Win10 image to vagrant box
-
-    ```vagrant
-    cd C:\kernel-debugging
-    vagrant package --base Win10 --output win10.box
-    vagrant box add win10 win10.box
+    pause
     ```
 
-    > `Win10` is the name of the newly created VM (it may have a different name
-    in your situation). `win10.box` is the vagrant VM box name.
+    > Ensure you run it so everything ran successfully.
 
-    > You need to the .box creation if you make changes to the base VM. To remove boxes do:
+    > You will need to change the hostip to your private IPv4 IP-address (run
+    > `ipconfig`)
 
-      ```vagrant
-      vagrant box list
-      vagrant box remove <name.box>
-      ```
+1. Restart VM
+1. Take a snapshot of your VMs state, this can serve as a base
+1. Attach WinDbg to the test PC (VM).
+    * Download the newest
+      [WinDbg](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/#install-windbg-directly)
+    * Open WinDbg -> File -> Attach to kernel -> Net -> Port: 49152 -> Key:
+      1.1.1.1
 
-1) Edit `kdbg.bat` on your host  machine so that `hostip` reflects your private IP.
-1) Now double-click on `start-debugger.bat`
+    > You are here telling WinDbg what VM to connect to by specifying port and
+    > key. This maps to the debug settings you sat in the steps prior: `bcdedit
+    > /dbgsettings net hostip:192.168.0.151 port:49152 key:1.1.1.1`
 
-### Refresh driver
+    Verify that you are not just waiting to connect by seeing something similar
+    to this:
 
-In case the vagrant-VM is up and running, then simply refresh the driver by
-running `refresh-driver.bat`.
+    ```output
+    Microsoft (R) Windows Debugger Version 10.0.27553.1004 AMD64
+    Copyright (c) Microsoft Corporation. All rights reserved.
 
-### Full vagrant VM reset
+    Using NET for debugging
+    Opened WinSock 2.0
+    Waiting to reconnect...
+    Connected to target 192.168.0.151 on port 49152 on local IP 192.168.0.151.
+    You can get the target MAC address by running .kdtargetmac command.
+    ```
 
-To fully reset the vagrant-VM ensure the `C:\kernel-debugger\.vagrant` folder is
-removed. After this, `start-debugger.bat` can be rerun.
+1. On the test PC (VM), run (elevated)
 
-## Resources
+```ps1
+Set-ExecutionPolicy RemoteSigned -Scope LocalMachine
+notepad $PROFILE.AllUsersAllHosts
+```
 
-Based on the great article and code from
-https://secret.club/2020/04/10/kernel_debugging_in_seconds.html
+Insert:
 
-## Troubleshoot
+```ps1
+function Install-Driver($name)
+{
+    $cleanName = $name -replace ".sys|.\\", ""
 
-### The vagrant process is shutting down immediately
+    sc.exe stop $cleanName
+    sc.exe delete $cleanName
 
-Do a `vagrant box list` and ensure the vagrant box was created.
+    cp $name c:\windows\system32\drivers\ -verbose -force
+    sc.exe create $cleanName type= kernel start= demand error= normal binPath= c:\windows\System32\Drivers\$cleanName.sys DisplayName= $cleanName
 
-## Known issues
+    sc.exe start $cleanName
+}
+```
 
-### Task may stop if host machine runs on battery
+1. Use Windows Driver Model (WDM) and not Windows Driver Framework (WDF) Kernel
+   Driver when creating driver projects
 
-* If the host machine (laptop) is ran on battery, the scheduled tasks may stop
-  to work (see issue
-  [here](https://stackoverflow.com/questions/9075564/change-settings-for-power-for-windows-scheduled-task)).
-  * Potential workaround: Use Powershells `New-ScheduledTaskSettingsSet` which
-    has a -AllowStartIfOnBatteries parameter.
-  * Workaround: For laptops, ensure its in a charger.
+> WDF wont let you easily unload drivers, but is likely the better option since
+> a lot of help is given.
 
-### Currently not possible to restart shutdown vagrant VM.
+When creating the driver, ensure you are using WDM in scenarios where you want
+to unload the driver without restarting.
 
-* Working on fix.
+* Create WDM project
+* Delete .inf file
+* Create driver.c and insert
+
+```c
+#include <ntddk.h>
+
+void DriverUnload(PDRIVER_OBJECT dob)
+{
+	UNREFERENCED_PARAMETER(dob);
+	DbgPrint("Driver unloaded");
+}
+
+NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) {
+
+	UNREFERENCED_PARAMETER(DriverObject);
+	UNREFERENCED_PARAMETER(RegistryPath);
+
+	DriverObject->DriverUnload = DriverUnload;
+	DbgPrint("Driver loaded");
+
+	return STATUS_SUCCESS;
+}
+```
