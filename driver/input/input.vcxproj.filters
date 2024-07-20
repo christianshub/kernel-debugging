@@ -19,12 +19,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Inf Include="input.inf">
-      <Filter>Driver Files</Filter>
-    </Inf>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Driver.c">
+    <ClCompile Include="driver.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

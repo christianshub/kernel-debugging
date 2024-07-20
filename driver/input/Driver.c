@@ -1,111 +1,124 @@
 #include <ntddk.h>
-#include <wdf.h>
+#include <ntddmou.h>
 
-DRIVER_INITIALIZE DriverEntry;
-EVT_WDF_DRIVER_DEVICE_ADD EvtDriverDeviceAdd;
-EVT_WDF_DRIVER_UNLOAD UnloadDriver;
-EVT_WDF_OBJECT_CONTEXT_CLEANUP EvtDriverContextCleanup;
-EVT_WDF_OBJECT_CONTEXT_CLEANUP EvtDeviceContextCleanup;
+#define IOCTL_MOUSE_MOVE CTL_CODE(FILE_DEVICE_UNKNOWN, 0x800, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
-// Context structure for driver-wide data
-typedef struct _DRIVER_CONTEXT {
-    WDFDEVICE Device;
-} DRIVER_CONTEXT, * PDRIVER_CONTEXT;
+void DriverUnload(PDRIVER_OBJECT DriverObject);
+NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath);
+NTSTATUS DispatchCreateClose(PDEVICE_OBJECT DeviceObject, PIRP Irp);
+NTSTATUS DispatchIoctl(PDEVICE_OBJECT DeviceObject, PIRP Irp);
+void MoveMouse(LONG x, LONG y);
 
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DRIVER_CONTEXT, DriverGetContext)
-
-// Unload driver callback function
-_Use_decl_annotations_
-void UnloadDriver(IN WDFDRIVER driver)
-{
-    UNREFERENCED_PARAMETER(driver);
-    DbgPrint("Driver unloaded\n");
-}
-
-// Cleanup callback function for driver context
-_Use_decl_annotations_
-void EvtDriverContextCleanup(WDFOBJECT DriverObject)
-{
-    PDRIVER_CONTEXT driverContext = DriverGetContext(DriverObject);
-    if (driverContext->Device != NULL) {
-        DbgPrint("Deleting device in driver context cleanup\n");
-        WdfObjectDelete(driverContext->Device);
-    }
-    DbgPrint("Driver context cleanup\n");
-}
-
-// Device context cleanup function
-_Use_decl_annotations_
-void EvtDeviceContextCleanup(WDFOBJECT DeviceObject)
-{
-    DbgPrint("Device context cleanup\n");
-    PDEVICE_OBJECT pDeviceObject = WdfDeviceWdmGetDeviceObject(DeviceObject);
-    IoDeleteDevice(pDeviceObject);
-}
-
-// Driver Entry function
-NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING RegistryPath)
-{
-    WDF_DRIVER_CONFIG config;
-    WDF_OBJECT_ATTRIBUTES attributes;
-    NTSTATUS status;
+NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) {
+    UNREFERENCED_PARAMETER(RegistryPath);
 
     DbgPrint("DriverEntry called\n");
 
-    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, DRIVER_CONTEXT);
-    attributes.EvtCleanupCallback = EvtDriverContextCleanup;
+    DriverObject->DriverUnload = DriverUnload;
+    DriverObject->MajorFunction[IRP_MJ_CREATE] = DispatchCreateClose;
+    DriverObject->MajorFunction[IRP_MJ_CLOSE] = DispatchCreateClose;
+    DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = DispatchIoctl;
 
-    WDF_DRIVER_CONFIG_INIT(&config, EvtDriverDeviceAdd);
-    config.EvtDriverUnload = UnloadDriver;
+    UNICODE_STRING deviceName = RTL_CONSTANT_STRING(L"\\Device\\MouseMover");
+    UNICODE_STRING symLinkName = RTL_CONSTANT_STRING(L"\\??\\MouseMover");
+    PDEVICE_OBJECT deviceObject = NULL;
 
-    status = WdfDriverCreate(DriverObject, RegistryPath, &attributes, &config, WDF_NO_HANDLE);
+    NTSTATUS status = IoCreateDevice(
+        DriverObject,
+        0,
+        &deviceName,
+        FILE_DEVICE_UNKNOWN,
+        FILE_DEVICE_SECURE_OPEN,
+        FALSE,
+        &deviceObject
+    );
+
+    if (NT_SUCCESS(status)) {
+        status = IoCreateSymbolicLink(&symLinkName, &deviceName);
+    }
+
     if (!NT_SUCCESS(status)) {
-        DbgPrint("WdfDriverCreate failed with status 0x%x\n", status);
-        return status;
+        IoDeleteDevice(deviceObject);
     }
 
     DbgPrint("Driver loaded\n");
+    return status;
+}
+
+void DriverUnload(PDRIVER_OBJECT DriverObject) {
+    UNICODE_STRING symLinkName = RTL_CONSTANT_STRING(L"\\??\\MouseMover");
+    IoDeleteSymbolicLink(&symLinkName);
+    IoDeleteDevice(DriverObject->DeviceObject);
+    DbgPrint("Driver unloaded\n");
+}
+
+NTSTATUS DispatchCreateClose(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
+    UNREFERENCED_PARAMETER(DeviceObject);
+
+    DbgPrint("DispatchCreateClose called\n");
+
+    Irp->IoStatus.Status = STATUS_SUCCESS;
+    Irp->IoStatus.Information = 0;
+    IoCompleteRequest(Irp, IO_NO_INCREMENT);
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS DispatchIoctl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
+    UNREFERENCED_PARAMETER(DeviceObject);
+
+    DbgPrint("DispatchIoctl called\n");
+
+    PIO_STACK_LOCATION irpSp = IoGetCurrentIrpStackLocation(Irp);
+    NTSTATUS status = STATUS_SUCCESS;
+    ULONG_PTR information = 0;
+
+    switch (irpSp->Parameters.DeviceIoControl.IoControlCode) {
+    case IOCTL_MOUSE_MOVE: {
+        if (irpSp->Parameters.DeviceIoControl.InputBufferLength < sizeof(LONG) * 2) {
+            status = STATUS_BUFFER_TOO_SMALL;
+            break;
+        }
+        LONG* inputBuffer = (LONG*)Irp->AssociatedIrp.SystemBuffer;
+        DbgPrint("MoveMouse called with x=%d, y=%d\n", inputBuffer[0], inputBuffer[1]);
+        MoveMouse(inputBuffer[0], inputBuffer[1]);
+        information = sizeof(LONG) * 2;
+        break;
+    }
+    default:
+        status = STATUS_INVALID_DEVICE_REQUEST;
+        break;
+    }
+
+    Irp->IoStatus.Status = status;
+    Irp->IoStatus.Information = information;
+    IoCompleteRequest(Irp, IO_NO_INCREMENT);
+
+    DbgPrint("DispatchIoctl completed\n");
 
     return status;
 }
 
-// EvtDriverDeviceAdd callback function
-NTSTATUS EvtDriverDeviceAdd(_In_ WDFDRIVER Driver, _Inout_ PWDFDEVICE_INIT DeviceInit)
-{
-    UNREFERENCED_PARAMETER(Driver);
-    WDFDEVICE device;
-    PDRIVER_CONTEXT driverContext;
-    NTSTATUS status;
-    UNICODE_STRING deviceName;
-    UNICODE_STRING symbolicLinkName;
+void MoveMouse(LONG x, LONG y) {
+    DbgPrint("MoveMouse function entered\n");
 
-    DbgPrint("EvtDriverDeviceAdd called\n");
+    MOUSE_INPUT_DATA mid = { 0 };
+    mid.LastX = x;
+    mid.LastY = y;
+    mid.Flags = MOUSE_MOVE_ABSOLUTE;
 
-    RtlInitUnicodeString(&deviceName, L"\\Device\\MyDevice");
-    RtlInitUnicodeString(&symbolicLinkName, L"\\DosDevices\\MyDevice");
+    UNICODE_STRING mouseDeviceName = RTL_CONSTANT_STRING(L"\\Device\\PointerClass0");
+    PFILE_OBJECT mouseFileObject;
+    PDEVICE_OBJECT mouseDeviceObject;
 
-    WdfDeviceInitAssignName(DeviceInit, &deviceName);
-
-    WDF_OBJECT_ATTRIBUTES deviceAttributes;
-    WDF_OBJECT_ATTRIBUTES_INIT(&deviceAttributes);
-    deviceAttributes.EvtCleanupCallback = EvtDeviceContextCleanup;
-
-    status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);
-    if (!NT_SUCCESS(status)) {
-        DbgPrint("WdfDeviceCreate failed with status 0x%x\n", status);
-        return status;
+    NTSTATUS status = IoGetDeviceObjectPointer(&mouseDeviceName, FILE_READ_DATA, &mouseFileObject, &mouseDeviceObject);
+    if (NT_SUCCESS(status)) {
+        PVOID mouseServiceCallback = mouseDeviceObject->DriverObject->MajorFunction[IRP_MJ_INTERNAL_DEVICE_CONTROL];
+        if (mouseServiceCallback) {
+            DbgPrint("Calling mouseServiceCallback\n");
+            (*(void(*)(PVOID, PVOID))mouseServiceCallback)(mouseDeviceObject->DeviceExtension, &mid);
+        }
+        ObDereferenceObject(mouseFileObject);
     }
 
-    status = WdfDeviceCreateSymbolicLink(device, &symbolicLinkName);
-    if (!NT_SUCCESS(status)) {
-        DbgPrint("WdfDeviceCreateSymbolicLink failed with status 0x%x\n", status);
-        return status;
-    }
-
-    driverContext = DriverGetContext(WdfGetDriver());
-    driverContext->Device = device;
-
-    DbgPrint("Device created successfully: %wZ\n", &deviceName);
-
-    return status;
+    DbgPrint("MoveMouse function completed\n");
 }
