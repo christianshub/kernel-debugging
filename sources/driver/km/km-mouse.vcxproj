@@ -142,6 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="communication\dispatch.h" />
+    <ClInclude Include="keyboard\keyboard.h" />
     <ClInclude Include="memory\memory.h" />
     <ClInclude Include="memory\process.h" />
     <ClInclude Include="mouse\mouse.h" />
