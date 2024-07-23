@@ -321,7 +321,6 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
   * Open program -> Device -> Search for your device.
 
 
+## Resources
 
-
-
-asad
+* <https://www.ired.team/miscellaneous-reversing-forensics/windows-kernel-internals/loading-a-windows-kernel-driver-osr-driver-loader-debugging-with-source-code>

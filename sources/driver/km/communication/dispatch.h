@@ -3,7 +3,6 @@
 #include "../utils/message.h"
 #include "../memory/memory.h"
 #include "../mouse/mouse.h"
-#include "../keyboard/keyboard.h"
 #include "../memory/process.h"
 
 #define PROCESSID_REQUEST CTL_CODE(FILE_DEVICE_UNKNOWN, 0x555, METHOD_BUFFERED, FILE_SPECIAL_ACCESS)
@@ -19,13 +18,6 @@ typedef struct _KMOUSE_REQUEST {
     long y;
     unsigned short button_flags;
 } KMOUSE_REQUEST, * PKMOUSE_REQUEST;
-
-#define KEYBOARD_REQUEST CTL_CODE(FILE_DEVICE_UNKNOWN, 0x777, METHOD_BUFFERED, FILE_SPECIAL_ACCESS)
-
-typedef struct _KKEYBOARD_REQUEST {
-    USHORT make_code;
-    USHORT flags; // Add flags to specify key down or key up
-} KKEYBOARD_REQUEST, * PKKEYBOARD_REQUEST;
 
 #define MODULEBASE_REQUEST CTL_CODE(FILE_DEVICE_UNKNOWN, 0x888, METHOD_BUFFERED, FILE_SPECIAL_ACCESS)
 

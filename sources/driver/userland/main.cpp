@@ -53,6 +53,8 @@ int main() {
         return 1;
     }
 
+    Sleep(1000);
+
     // Key up event
     keyboard_request.flags = KEY_BREAK;  // Key up
 

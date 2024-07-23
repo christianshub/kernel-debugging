@@ -24,28 +24,6 @@ NTSTATUS on_message(PDEVICE_OBJECT device_object, PIRP irp) {
 
         return STATUS_SUCCESS;
     }
-    else if (control_code == KEYBOARD_REQUEST) {
-        message("Keyboard request\n");
-        PKKEYBOARD_REQUEST keyboard_request = (PKKEYBOARD_REQUEST)irp->AssociatedIrp.SystemBuffer;
-
-        message("make_code: %x, flags: %x\n", keyboard_request->make_code, keyboard_request->flags);
-
-        // Send the key down or up event based on flags
-        if (keyboard_request->flags == KEYBOARD_KEY_DOWN) {
-            message("Sending key down\n");
-            keyboard_key_down(keyboard_request->make_code);
-        }
-        else if (keyboard_request->flags == KEYBOARD_KEY_UP) {
-            message("Sending key up\n");
-            keyboard_key_up(keyboard_request->make_code);
-        }
-
-        irp->IoStatus.Status = STATUS_SUCCESS;
-        irp->IoStatus.Information = 0;
-        IoCompleteRequest(irp, IO_NO_INCREMENT);
-
-        return STATUS_SUCCESS;
-    }
     else if (control_code == PROCESSID_REQUEST) {
         // Handle other requests (if needed)
     }

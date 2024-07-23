@@ -32,22 +32,6 @@ typedef struct _MOUSE_OBJECT {
     BOOL use_mouse;
 } MOUSE_OBJECT, * PMOUSE_OBJECT;
 
-typedef struct _KEYBOARD_INPUT_DATA {
-    USHORT UnitId;
-    USHORT MakeCode;
-    USHORT Flags;
-    USHORT Reserved;
-    ULONG ExtraInformation;
-} KEYBOARD_INPUT_DATA, * PKEYBOARD_INPUT_DATA;
-
-typedef VOID(*KeyboardClassServiceCallbackFn)(PDEVICE_OBJECT DeviceObject, PKEYBOARD_INPUT_DATA InputDataStart, PKEYBOARD_INPUT_DATA InputDataEnd, PULONG InputDataConsumed);
-
-typedef struct _KEYBOARD_OBJECT {
-    PDEVICE_OBJECT keyboard_device;
-    KeyboardClassServiceCallbackFn service_callback;
-    BOOL use_keyboard;
-} KEYBOARD_OBJECT, * PKEYBOARD_OBJECT;
-
 typedef struct _PEB_LDR_DATA {
     ULONG Length;
     UCHAR Initialized;
@@ -119,7 +103,6 @@ typedef struct _RTL_PROCESS_MODULES {
 } RTL_PROCESS_MODULES, * PRTL_PROCESS_MODULES;
 
 MOUSE_OBJECT gMouseObject;
-KEYBOARD_OBJECT gKeyboardObject;
 
 QWORD _KeAcquireSpinLockAtDpcLevel;
 QWORD _KeReleaseSpinLockFromDpcLevel;
@@ -130,8 +113,6 @@ NTSYSCALLAPI
 POBJECT_TYPE* IoDriverObjectType;
 
 VOID MouseClassServiceCallback(PDEVICE_OBJECT DeviceObject, PMOUSE_INPUT_DATA InputDataStart, PMOUSE_INPUT_DATA InputDataEnd, PULONG InputDataConsumed);
-
-VOID KeyboardClassServiceCallback(PDEVICE_OBJECT DeviceObject, PKEYBOARD_INPUT_DATA InputDataStart, PKEYBOARD_INPUT_DATA InputDataEnd, PULONG InputDataConsumed);
 
 NTSYSCALLAPI
 NTSTATUS
