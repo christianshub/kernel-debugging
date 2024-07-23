@@ -320,6 +320,9 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
   * Use x64-version on the VM host (local)
   * Open program -> Device -> Search for your device.
 
+## Troubleshooting
+
+* Your may need to add a Test certificate or a File Digest Algorithm in your visual studio project. In order to do so, go to Project -> Properties -> Driver Signing
 
 ## Resources
 
